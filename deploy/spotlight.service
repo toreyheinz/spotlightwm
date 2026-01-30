@@ -1,0 +1,31 @@
+[Unit]
+Description=spotlight Phoenix Application
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=dev
+Group=dev
+WorkingDirectory=${DEPLOY_TO}/current
+
+# Environment
+Environment="MIX_ENV=prod"
+Environment="PORT=${APP_PORT}"
+Environment="PHX_SERVER=true"
+Environment="PHX_HOST=${PHX_HOST}"
+Environment="LANG=en_US.UTF-8"
+
+# Start/stop using release scripts (asdf sourced via rel/env.sh.eex)
+ExecStart=${DEPLOY_TO}/current/_build/prod/rel/spotlight/bin/spotlight start
+ExecStop=${DEPLOY_TO}/current/_build/prod/rel/spotlight/bin/spotlight stop
+
+Restart=on-failure
+RestartSec=5
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=spotlight
+
+[Install]
+WantedBy=multi-user.target
