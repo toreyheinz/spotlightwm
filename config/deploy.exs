@@ -13,20 +13,10 @@ config :deploy,
 
 # Production environment configuration
 config :deploy, :production,
-  branch: "production",
+  branch: "main",
   user: "dev",
   domain: "ssh.teagles.io",
   port: 22,
   deploy_to: "/var/www/www.spotlightwm.org",
   url: "https://www.spotlightwm.org",
   app_port: 4006
-
-# Staging environment configuration
-config :deploy, :staging,
-  branch: "main",
-  user: "dev",
-  domain: "ssh.teagles.io",
-  port: 22,
-  deploy_to: "/var/www/null",
-  url: "https://null",
-  app_port: null
