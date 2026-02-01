@@ -112,12 +112,16 @@ defmodule Mix.Tasks.Deploy.Nginx do
       # Create unique upstream name from server_name (replace dots/dashes with underscores)
       upstream_name = server_name |> String.replace(~r/[.-]/, "_")
 
+      # Extract apex domain (remove www. prefix if present)
+      apex_domain = String.replace_prefix(server_name, "www.", "")
+
       # Replace variables
       content =
         template
         |> String.replace("${APP_NAME}", config.app_name)
         |> String.replace("${APP_PORT}", to_string(config.app_port))
         |> String.replace("${SERVER_NAME}", server_name)
+        |> String.replace("${APEX_DOMAIN}", apex_domain)
         |> String.replace("${SSL_DOMAIN}", ssl_domain)
         |> String.replace("${UPSTREAM_NAME}", upstream_name)
         |> String.replace(
