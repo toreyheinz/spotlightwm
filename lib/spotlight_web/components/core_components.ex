@@ -303,6 +303,88 @@ defmodule SpotlightWeb.CoreComponents do
   end
 
   @doc """
+  Renders a modal dialog.
+
+  ## Examples
+
+      <.modal id="confirm-modal" show on_cancel={JS.patch(~p"/posts")}>
+        Are you sure?
+      </.modal>
+  """
+  attr :id, :string, required: true
+  attr :show, :boolean, default: false
+  attr :on_cancel, JS, default: %JS{}
+  slot :inner_block, required: true
+
+  def modal(assigns) do
+    ~H"""
+    <div
+      id={@id}
+      phx-mounted={@show && show_modal(@id)}
+      phx-remove={hide_modal(@id)}
+      data-cancel={JS.exec(@on_cancel, "phx-remove")}
+      class="relative z-50 hidden"
+    >
+      <div
+        id={"#{@id}-bg"}
+        class="bg-base-300/80 fixed inset-0 transition-opacity"
+        aria-hidden="true"
+      />
+      <div
+        class="fixed inset-0 overflow-y-auto"
+        aria-labelledby={"#{@id}-title"}
+        aria-describedby={"#{@id}-description"}
+        role="dialog"
+        aria-modal="true"
+        tabindex="0"
+      >
+        <div class="flex min-h-full items-center justify-center">
+          <div
+            id={"#{@id}-container"}
+            class="w-full max-w-xl p-4 sm:p-6 lg:py-8"
+            phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
+            phx-key="escape"
+            phx-click-away={JS.exec("data-cancel", to: "##{@id}")}
+          >
+            <div class="card bg-base-100 shadow-xl">
+              <div class="card-body relative">
+                <button
+                  phx-click={JS.exec("data-cancel", to: "##{@id}")}
+                  type="button"
+                  class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+                  aria-label="close"
+                >
+                  ✕
+                </button>
+                {render_slot(@inner_block)}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  defp show_modal(js \\ %JS{}, id) when is_binary(id) do
+    js
+    |> JS.show(to: "##{id}")
+    |> JS.show(to: "##{id}-bg", transition: {"transition-all", "opacity-0", "opacity-100"})
+    |> JS.show(to: "##{id}-container", transition: {"transition-all", "opacity-0 scale-95", "opacity-100 scale-100"})
+    |> JS.add_class("overflow-hidden", to: "body")
+    |> JS.focus_first(to: "##{id}-container")
+  end
+
+  defp hide_modal(js \\ %JS{}, id) do
+    js
+    |> JS.hide(to: "##{id}-bg", transition: {"transition-all", "opacity-100", "opacity-0"})
+    |> JS.hide(to: "##{id}-container", transition: {"transition-all", "opacity-100 scale-100", "opacity-0 scale-95"})
+    |> JS.hide(to: "##{id}", transition: {"block", "block", "hidden"})
+    |> JS.remove_class("overflow-hidden", to: "body")
+    |> JS.pop_focus()
+  end
+
+  @doc """
   Renders a table with generic styling.
 
   ## Examples

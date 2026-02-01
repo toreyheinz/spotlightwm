@@ -13,6 +13,7 @@ config :spotlight, Spotlight.Repo,
 # For development, we disable any cache and enable
 # debugging and code reloading.
 config :spotlight, SpotlightWeb.Endpoint,
+  url: [host: "spotlight.test", port: 80],
   http: [ip: {127, 0, 0, 1}, port: String.to_integer(System.get_env("PORT") || "4000")],
   check_origin: false,
   code_reloader: true,
