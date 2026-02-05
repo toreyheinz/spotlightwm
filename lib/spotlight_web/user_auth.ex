@@ -7,6 +7,37 @@ defmodule SpotlightWeb.UserAuth do
   alias Spotlight.Accounts
   alias Spotlight.Accounts.Scope
 
+  # LiveView on_mount hook for admin routes
+  def on_mount(:ensure_authenticated, _params, session, socket) do
+    socket =
+      socket
+      |> mount_current_scope(session)
+      |> Phoenix.LiveView.attach_hook(:set_current_path, :handle_params, &set_current_path/3)
+
+    if socket.assigns.current_scope && socket.assigns.current_scope.user do
+      {:cont, socket}
+    else
+      {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/users/log-in")}
+    end
+  end
+
+  defp mount_current_scope(socket, session) do
+    Phoenix.Component.assign_new(socket, :current_scope, fn ->
+      if token = session["user_token"] do
+        case Accounts.get_user_by_session_token(token) do
+          {user, _inserted_at} -> Scope.for_user(user)
+          nil -> Scope.for_user(nil)
+        end
+      else
+        Scope.for_user(nil)
+      end
+    end)
+  end
+
+  defp set_current_path(_params, uri, socket) do
+    {:cont, Phoenix.Component.assign(socket, :current_path, URI.parse(uri).path)}
+  end
+
   # Make the remember me cookie valid for 14 days. This should match
   # the session validity setting in UserToken.
   @max_cookie_age_in_days 14

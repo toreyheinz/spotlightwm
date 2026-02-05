@@ -64,12 +64,17 @@ defmodule SpotlightWeb.Router do
   scope "/admin", SpotlightWeb.Admin, as: :admin do
     pipe_through [:browser, :require_authenticated_user]
 
-    live "/", DashboardLive, :index
-    live "/productions", ProductionLive.Index, :index
-    live "/productions/new", ProductionLive.Index, :new
-    live "/productions/:id", ProductionLive.Show, :show
-    live "/productions/:id/edit", ProductionLive.Show, :edit
-    live "/users", UserLive.Index, :index
-    live "/users/new", UserLive.Index, :new
+    live_session :admin,
+      on_mount: [{SpotlightWeb.UserAuth, :ensure_authenticated}],
+      layout: {SpotlightWeb.Layouts, :admin},
+      root_layout: {SpotlightWeb.Layouts, :admin_root} do
+      live "/", DashboardLive, :index
+      live "/productions", ProductionLive.Index, :index
+      live "/productions/new", ProductionLive.Index, :new
+      live "/productions/:id", ProductionLive.Show, :show
+      live "/productions/:id/edit", ProductionLive.Show, :edit
+      live "/users", UserLive.Index, :index
+      live "/users/new", UserLive.Index, :new
+    end
   end
 end

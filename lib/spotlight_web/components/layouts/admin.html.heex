@@ -1,0 +1,53 @@
+<% current_path = assigns[:current_path] || "" %>
+<div class="min-h-screen flex bg-white">
+  <!-- Sidebar -->
+  <aside class="w-56 bg-white border-r border-gray-200 flex-shrink-0 fixed h-full overflow-y-auto">
+    <!-- Logo -->
+    <div class="h-14 flex items-center px-4 border-b border-gray-200">
+      <a href="/" class="flex items-center gap-2">
+        <span class="font-bold text-gray-900">Spotlight</span>
+        <span class="text-gray-500 text-sm">Admin</span>
+      </a>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="p-4 space-y-6">
+      <.admin_nav_section title="PRODUCTIONS">
+        <.admin_nav_item href={~p"/admin"} icon="hero-home" current={current_path == "/admin"}>
+          Dashboard
+        </.admin_nav_item>
+        <.admin_nav_item href={~p"/admin/productions"} icon="hero-film" current={String.starts_with?(current_path, "/admin/productions")}>
+          Productions
+        </.admin_nav_item>
+      </.admin_nav_section>
+
+      <.admin_nav_section title="USERS">
+        <.admin_nav_item href={~p"/admin/users"} icon="hero-users" current={String.starts_with?(current_path, "/admin/users")}>
+          Users
+        </.admin_nav_item>
+      </.admin_nav_section>
+    </nav>
+  </aside>
+
+  <!-- Main content area -->
+  <div class="flex-1 ml-56">
+    <!-- Top bar -->
+    <header class="h-14 bg-white border-b border-gray-200 flex items-center justify-end px-6 sticky top-0 z-10">
+      <div class="flex items-center gap-4">
+        <%= if @current_scope do %>
+          <span class="text-sm text-gray-700">{@current_scope.user.name || @current_scope.user.email}</span>
+          <.link href={~p"/users/log-out"} method="delete" class="text-sm text-red-600 hover:text-red-800 font-medium">
+            Sign Out
+          </.link>
+        <% end %>
+      </div>
+    </header>
+
+    <!-- Page content -->
+    <main class="p-8">
+      {@inner_content}
+    </main>
+  </div>
+</div>
+
+<.flash_group flash={@flash} />
