@@ -70,13 +70,7 @@
             </li>
             <%= if @current_scope do %>
               <li>
-                {@current_scope.user.email}
-              </li>
-              <li>
-                <.link href={~p"/users/settings"}>Settings</.link>
-              </li>
-              <li>
-                <.link href={~p"/users/log-out"} method="delete">Log out</.link>
+                <.link href={~p"/admin"}>Admin</.link>
               </li>
             <% else %>
               <li>
