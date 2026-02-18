@@ -13,18 +13,36 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
   end
 
   @impl true
-  def handle_params(%{"id" => id}, _, socket) do
-    production = Productions.get_production_with_details!(id)
+  def handle_params(params, _, socket) do
+    production = Productions.get_production_with_details!(params["id"])
+
+    performance =
+      case socket.assigns.live_action do
+        :add_performance ->
+          %Spotlight.Productions.Performance{}
+
+        :edit_performance ->
+          Productions.get_performance!(params["performance_id"])
+
+        _ ->
+          nil
+      end
 
     {:noreply,
      socket
      |> assign(:page_title, page_title(socket.assigns.live_action, production))
-     |> assign(:production, production)}
+     |> assign(:production, production)
+     |> assign(:performance, performance)}
   end
 
   @impl true
   def handle_info({SpotlightWeb.Admin.ProductionLive.FormComponent, {:saved, production}}, socket) do
     production = Productions.get_production_with_details!(production.id)
+    {:noreply, assign(socket, :production, production)}
+  end
+
+  def handle_info({SpotlightWeb.Admin.ProductionLive.PerformanceFormComponent, {:performance_saved, _performance}}, socket) do
+    production = Productions.get_production_with_details!(socket.assigns.production.id)
     {:noreply, assign(socket, :production, production)}
   end
 
@@ -132,6 +150,8 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
 
   defp page_title(:show, production), do: production.title
   defp page_title(:edit, production), do: "Edit #{production.title}"
+  defp page_title(:add_performance, production), do: "#{production.title} — Add Performance"
+  defp page_title(:edit_performance, production), do: "#{production.title} — Edit Performance"
 
   @impl true
   def render(assigns) do
@@ -203,9 +223,9 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
             <div class="card-body">
               <div class="flex justify-between items-center">
                 <h2 class="card-title">Performances</h2>
-                <button class="btn btn-sm btn-outline" disabled>
+                <.link patch={~p"/admin/productions/#{@production.id}/performances/new"} class="btn btn-sm btn-outline">
                   Add Performance
-                </button>
+                </.link>
               </div>
 
               <%= if Enum.empty?(@production.performances) do %>
@@ -227,7 +247,13 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
                             {Calendar.strftime(perf.starts_at, "%a, %b %-d, %Y at %-I:%M %p")}
                           </td>
                           <td class="text-gray-600">{perf.notes}</td>
-                          <td>
+                          <td class="flex gap-1">
+                            <.link
+                              patch={~p"/admin/productions/#{@production.id}/performances/#{perf.id}/edit"}
+                              class="btn btn-xs btn-ghost"
+                            >
+                              Edit
+                            </.link>
                             <button
                               phx-click="delete_performance"
                               phx-value-id={perf.id}
@@ -381,6 +407,23 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
           id={@production.id}
           title="Edit Production"
           action={@live_action}
+          production={@production}
+          patch={~p"/admin/productions/#{@production.id}"}
+        />
+      </.modal>
+
+      <.modal
+        :if={@live_action in [:add_performance, :edit_performance]}
+        id="performance-modal"
+        show
+        on_cancel={JS.patch(~p"/admin/productions/#{@production.id}")}
+      >
+        <.live_component
+          module={SpotlightWeb.Admin.ProductionLive.PerformanceFormComponent}
+          id={@performance.id || :new}
+          title={if @live_action == :add_performance, do: "Add Performance", else: "Edit Performance"}
+          action={@live_action}
+          performance={@performance}
           production={@production}
           patch={~p"/admin/productions/#{@production.id}"}
         />

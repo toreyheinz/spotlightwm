@@ -124,6 +124,11 @@ defmodule Spotlight.Productions do
   ## Performances
 
   @doc """
+  Gets a single performance.
+  """
+  def get_performance!(id), do: Repo.get!(Performance, id)
+
+  @doc """
   Creates a performance for a production.
   """
   def create_performance(%Production{} = production, attrs \\ %{}) do
