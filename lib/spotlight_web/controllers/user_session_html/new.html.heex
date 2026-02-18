@@ -1,16 +1,14 @@
 <Layouts.app flash={@flash} current_scope={@current_scope}>
-  <div class="mx-auto max-w-sm space-y-4">
+  <div class="mx-auto max-w-sm space-y-4 text-gray-800">
     <div class="text-center">
-      <.header>
-        <p>Log in</p>
-        <:subtitle>
-          <%= if @current_scope do %>
-            You need to reauthenticate to perform sensitive actions on your account.
-          <% else %>
-            Enter your email to receive a login link.
-          <% end %>
-        </:subtitle>
-      </.header>
+      <h1 class="text-lg font-semibold leading-8 pb-1">Log in</h1>
+      <p class="text-sm text-gray-600">
+        <%= if @current_scope do %>
+          You need to reauthenticate to perform sensitive actions on your account.
+        <% else %>
+          Enter your email to receive a login link.
+        <% end %>
+      </p>
     </div>
 
     <div :if={local_mail_adapter?()} class="alert alert-info">
@@ -29,37 +27,13 @@
         field={f[:email]}
         type="email"
         label="Email"
+        class="w-full input bg-white border-gray-300 text-gray-800"
         autocomplete="email"
         required
         phx-mounted={JS.focus()}
       />
       <.button class="btn btn-primary w-full">
         Log in with email <span aria-hidden="true">→</span>
-      </.button>
-    </.form>
-
-    <div class="divider">or</div>
-
-    <.form :let={f} for={@form} as={:user} id="login_form_password" action={~p"/users/log-in"}>
-      <.input
-        readonly={!!@current_scope}
-        field={f[:email]}
-        type="email"
-        label="Email"
-        autocomplete="email"
-        required
-      />
-      <.input
-        field={f[:password]}
-        type="password"
-        label="Password"
-        autocomplete="current-password"
-      />
-      <.button class="btn btn-primary w-full" name={@form[:remember_me].name} value="true">
-        Log in and stay logged in <span aria-hidden="true">→</span>
-      </.button>
-      <.button class="btn btn-primary btn-soft w-full mt-2">
-        Log in only this time
       </.button>
     </.form>
   </div>
