@@ -10,7 +10,9 @@ defmodule SpotlightWeb.PageController do
   end
 
   def productions(conn, _params) do
-    render(conn, :productions)
+    upcoming = Spotlight.Productions.list_upcoming_productions()
+    past = Spotlight.Productions.list_past_productions()
+    render(conn, :productions, upcoming: upcoming, past: past)
   end
 
   def golden_quill(conn, _params) do
