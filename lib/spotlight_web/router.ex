@@ -27,6 +27,10 @@ defmodule SpotlightWeb.Router do
     get "/contact", PageController, :contact
   end
 
+  scope "/", SpotlightWeb do
+    get "/images/w/:width/*path", ImageController, :show
+  end
+
   # Enable LiveDashboard in development
   if Application.compile_env(:spotlight, :dev_routes) do
     import Phoenix.LiveDashboard.Router

@@ -52,5 +52,8 @@ config :phoenix_live_view,
   debug_attributes: true,
   enable_expensive_runtime_checks: true
 
+# Uploads directory
+config :spotlight, :uploads_dir, Path.expand("../uploads", __DIR__)
+
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false

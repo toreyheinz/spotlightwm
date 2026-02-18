@@ -16,6 +16,13 @@
           <div class="bg-[#C23B23] text-white p-4 text-center">
             <span class="text-sm uppercase tracking-wide font-semibold">Next Production</span>
           </div>
+          <%= if production.main_image_url do %>
+            <img
+              src={"/images/w/800#{production.main_image_url}"}
+              alt={production.title}
+              class="w-full h-64 object-cover"
+            />
+          <% end %>
           <div class="p-8 text-center">
             <h3 class="text-3xl font-bold text-[#1C3A47] mb-2">
               &ldquo;{production.title}&rdquo;
@@ -67,6 +74,13 @@
       <h2 class="text-3xl font-bold text-[#1C3A47] mb-8 text-center">Past Productions</h2>
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
         <div :for={production <- @past} class="bg-[#F5EED6] rounded-lg overflow-hidden shadow-md">
+          <%= if production.main_image_url do %>
+            <img
+              src={"/images/w/400#{production.main_image_url}"}
+              alt={production.title}
+              class="w-full h-48 object-cover"
+            />
+          <% end %>
           <div class="p-6">
             <h3 class="text-xl font-bold text-[#1C3A47] mb-2">
               &ldquo;{production.title}&rdquo;

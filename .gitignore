@@ -35,3 +35,6 @@ spotlight-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# Uploads
+/uploads
+

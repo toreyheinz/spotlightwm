@@ -2,10 +2,14 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
   use SpotlightWeb, :live_view
 
   alias Spotlight.Productions
+  alias Spotlight.Uploads
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, socket}
+    {:ok,
+     socket
+     |> allow_upload(:main_image, accept: ~w(.jpg .jpeg .png .webp), max_entries: 1, max_file_size: 10_000_000)
+     |> allow_upload(:photos, accept: ~w(.jpg .jpeg .png .webp), max_entries: 10, max_file_size: 10_000_000)}
   end
 
   @impl true
@@ -35,6 +39,95 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
     else
       {:noreply, socket}
     end
+  end
+
+  def handle_event("validate_main_image", _params, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_event("save_main_image", _params, socket) do
+    production = socket.assigns.production
+
+    [url] =
+      consume_uploaded_entries(socket, :main_image, fn %{path: tmp_path}, entry ->
+        ext = Path.extname(entry.client_name)
+        filename = "#{Ecto.UUID.generate()}#{ext}"
+        subdir = "productions/#{production.id}"
+        dest_dir = Path.join([Uploads.uploads_dir(), subdir])
+        dest = Path.join(dest_dir, filename)
+
+        File.mkdir_p!(dest_dir)
+        File.cp!(tmp_path, dest)
+
+        {:ok, "/uploads/#{subdir}/#{filename}"}
+      end)
+
+    # Delete old image if present
+    if production.main_image_url, do: Uploads.delete(production.main_image_url)
+
+    {:ok, production} = Productions.update_production(production, %{main_image_url: url})
+    production = Productions.get_production_with_details!(production.id)
+
+    {:noreply, assign(socket, :production, production)}
+  end
+
+  def handle_event("delete_main_image", _params, socket) do
+    production = socket.assigns.production
+
+    if production.main_image_url do
+      Uploads.delete(production.main_image_url)
+      {:ok, production} = Productions.update_production(production, %{main_image_url: nil})
+      production = Productions.get_production_with_details!(production.id)
+      {:noreply, assign(socket, :production, production)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def handle_event("validate_photos", _params, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_event("save_photos", _params, socket) do
+    production = socket.assigns.production
+
+    urls =
+      consume_uploaded_entries(socket, :photos, fn %{path: tmp_path}, entry ->
+        ext = Path.extname(entry.client_name)
+        filename = "#{Ecto.UUID.generate()}#{ext}"
+        subdir = "productions/#{production.id}"
+        dest_dir = Path.join([Uploads.uploads_dir(), subdir])
+        dest = Path.join(dest_dir, filename)
+
+        File.mkdir_p!(dest_dir)
+        File.cp!(tmp_path, dest)
+
+        {:ok, "/uploads/#{subdir}/#{filename}"}
+      end)
+
+    Enum.each(urls, fn url ->
+      Productions.create_production_photo(production, %{"url" => url})
+    end)
+
+    production = Productions.get_production_with_details!(production.id)
+    {:noreply, assign(socket, :production, production)}
+  end
+
+  def handle_event("delete_photo", %{"id" => id}, socket) do
+    photo = Enum.find(socket.assigns.production.photos, &(&1.id == id))
+
+    if photo do
+      Uploads.delete(photo.url)
+      Productions.delete_production_photo(photo)
+      production = Productions.get_production_with_details!(socket.assigns.production.id)
+      {:noreply, assign(socket, :production, production)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def handle_event("cancel_upload", %{"ref" => ref, "upload" => upload}, socket) do
+    {:noreply, cancel_upload(socket, String.to_existing_atom(upload), ref)}
   end
 
   defp page_title(:show, production), do: production.title
@@ -165,14 +258,50 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
               <h2 class="card-title">Main Image</h2>
               <%= if @production.main_image_url do %>
                 <img src={@production.main_image_url} alt={@production.title} class="rounded-lg" />
+                <button
+                  phx-click="delete_main_image"
+                  data-confirm="Remove the main image?"
+                  class="btn btn-sm btn-error btn-outline mt-2"
+                >
+                  Remove Image
+                </button>
               <% else %>
                 <div class="bg-gray-200 rounded-lg aspect-video flex items-center justify-center">
                   <span class="text-gray-500">No image uploaded</span>
                 </div>
               <% end %>
-              <button class="btn btn-sm btn-outline mt-2" disabled>
-                Upload Image
-              </button>
+
+              <form id="main-image-upload" phx-submit="save_main_image" phx-change="validate_main_image" class="mt-2">
+                <.live_file_input upload={@uploads.main_image} class="file-input file-input-bordered file-input-sm w-full" />
+
+                <%= for entry <- @uploads.main_image.entries do %>
+                  <div class="mt-2 space-y-1">
+                    <div class="flex items-center gap-2">
+                      <.live_img_preview entry={entry} class="w-20 h-20 object-cover rounded" />
+                      <div class="flex-1">
+                        <p class="text-sm truncate">{entry.client_name}</p>
+                        <progress class="progress progress-primary w-full" value={entry.progress} max="100">
+                          {entry.progress}%
+                        </progress>
+                      </div>
+                      <button type="button" phx-click="cancel_upload" phx-value-ref={entry.ref} phx-value-upload="main_image" class="btn btn-xs btn-ghost">
+                        ✕
+                      </button>
+                    </div>
+                    <%= for err <- upload_errors(@uploads.main_image, entry) do %>
+                      <p class="text-error text-xs">{error_to_string(err)}</p>
+                    <% end %>
+                  </div>
+                <% end %>
+
+                <%= for err <- upload_errors(@uploads.main_image) do %>
+                  <p class="text-error text-xs mt-1">{error_to_string(err)}</p>
+                <% end %>
+
+                <%= if @uploads.main_image.entries != [] do %>
+                  <button type="submit" class="btn btn-sm btn-primary mt-2">Upload</button>
+                <% end %>
+              </form>
             </div>
           </div>
 
@@ -185,13 +314,57 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
               <% else %>
                 <div class="grid grid-cols-2 gap-2">
                   <%= for photo <- @production.photos do %>
-                    <img src={photo.url} alt={photo.caption} class="rounded-lg" />
+                    <div class="relative group">
+                      <img src={photo.url} alt={photo.caption} class="rounded-lg w-full aspect-square object-cover" />
+                      <button
+                        phx-click="delete_photo"
+                        phx-value-id={photo.id}
+                        data-confirm="Delete this photo?"
+                        class="btn btn-xs btn-circle btn-error absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        ✕
+                      </button>
+                    </div>
                   <% end %>
                 </div>
               <% end %>
-              <button class="btn btn-sm btn-outline mt-2" disabled>
-                Upload Photos
-              </button>
+
+              <form id="photos-upload" phx-submit="save_photos" phx-change="validate_photos" class="mt-2">
+                <.live_file_input upload={@uploads.photos} class="file-input file-input-bordered file-input-sm w-full" />
+
+                <%= if @uploads.photos.entries != [] do %>
+                  <div class="grid grid-cols-3 gap-2 mt-2">
+                    <%= for entry <- @uploads.photos.entries do %>
+                      <div class="relative">
+                        <.live_img_preview entry={entry} class="w-full aspect-square object-cover rounded" />
+                        <progress class="progress progress-primary progress-xs w-full" value={entry.progress} max="100">
+                          {entry.progress}%
+                        </progress>
+                        <button
+                          type="button"
+                          phx-click="cancel_upload"
+                          phx-value-ref={entry.ref}
+                          phx-value-upload="photos"
+                          class="btn btn-xs btn-circle btn-ghost absolute top-0 right-0"
+                        >
+                          ✕
+                        </button>
+                        <%= for err <- upload_errors(@uploads.photos, entry) do %>
+                          <p class="text-error text-xs">{error_to_string(err)}</p>
+                        <% end %>
+                      </div>
+                    <% end %>
+                  </div>
+                <% end %>
+
+                <%= for err <- upload_errors(@uploads.photos) do %>
+                  <p class="text-error text-xs mt-1">{error_to_string(err)}</p>
+                <% end %>
+
+                <%= if @uploads.photos.entries != [] do %>
+                  <button type="submit" class="btn btn-sm btn-primary mt-2">Upload Photos</button>
+                <% end %>
+              </form>
             </div>
           </div>
         </div>
@@ -215,4 +388,9 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
     </div>
     """
   end
+
+  defp error_to_string(:too_large), do: "File is too large (max 10MB)"
+  defp error_to_string(:too_many_files), do: "Too many files selected"
+  defp error_to_string(:not_accepted), do: "Unsupported file type (use JPG, PNG, or WebP)"
+  defp error_to_string(err), do: to_string(err)
 end
