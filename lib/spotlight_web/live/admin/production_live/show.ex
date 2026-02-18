@@ -65,20 +65,12 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
 
   def handle_event("save_main_image", _params, socket) do
     production = socket.assigns.production
+    subdir = "productions/#{production.id}"
 
     [url] =
-      consume_uploaded_entries(socket, :main_image, fn %{path: tmp_path}, entry ->
-        ext = Path.extname(entry.client_name)
-        filename = "#{Ecto.UUID.generate()}#{ext}"
-        subdir = "productions/#{production.id}"
-        dest_dir = Path.join([Uploads.uploads_dir(), subdir])
-        dest = Path.join(dest_dir, filename)
-
-        File.mkdir_p!(dest_dir)
-        File.cp!(tmp_path, dest)
-
-        {:ok, "/uploads/#{subdir}/#{filename}"}
-      end)
+      for entry <- socket.assigns.uploads.main_image.entries do
+        Uploads.save(socket, entry, subdir)
+      end
 
     # Delete old image if present
     if production.main_image_url, do: Uploads.delete(production.main_image_url)
@@ -108,20 +100,12 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
 
   def handle_event("save_photos", _params, socket) do
     production = socket.assigns.production
+    subdir = "productions/#{production.id}"
 
     urls =
-      consume_uploaded_entries(socket, :photos, fn %{path: tmp_path}, entry ->
-        ext = Path.extname(entry.client_name)
-        filename = "#{Ecto.UUID.generate()}#{ext}"
-        subdir = "productions/#{production.id}"
-        dest_dir = Path.join([Uploads.uploads_dir(), subdir])
-        dest = Path.join(dest_dir, filename)
-
-        File.mkdir_p!(dest_dir)
-        File.cp!(tmp_path, dest)
-
-        {:ok, "/uploads/#{subdir}/#{filename}"}
-      end)
+      for entry <- socket.assigns.uploads.photos.entries do
+        Uploads.save(socket, entry, subdir)
+      end
 
     Enum.each(urls, fn url ->
       Productions.create_production_photo(production, %{"url" => url})
@@ -283,7 +267,7 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
             <div class="card-body">
               <h2 class="card-title">Main Image</h2>
               <%= if @production.main_image_url do %>
-                <img src={@production.main_image_url} alt={@production.title} class="rounded-lg" />
+                <img src={"/images/w/800#{@production.main_image_url}"} alt={@production.title} class="rounded-lg" />
                 <button
                   phx-click="delete_main_image"
                   data-confirm="Remove the main image?"
@@ -341,7 +325,7 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
                 <div class="grid grid-cols-2 gap-2">
                   <%= for photo <- @production.photos do %>
                     <div class="relative group">
-                      <img src={photo.url} alt={photo.caption} class="rounded-lg w-full aspect-square object-cover" />
+                      <img src={"/images/w/400#{photo.url}"} alt={photo.caption} class="rounded-lg w-full aspect-square object-cover" />
                       <button
                         phx-click="delete_photo"
                         phx-value-id={photo.id}

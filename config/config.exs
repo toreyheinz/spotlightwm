@@ -85,6 +85,19 @@ config :logger, :default_formatter,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
+# Cloudflare R2 (S3-compatible) storage
+config :ex_aws,
+  json_codec: Jason,
+  http_client: ExAws.Request.Req
+
+config :ex_aws, :s3, %{
+  scheme: "https://",
+  host: "b253e6fbfd2f7757cadd0386de5bde3f.r2.cloudflarestorage.com",
+  region: "auto"
+}
+
+config :spotlight, :r2_bucket, "spotlightwm"
+
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 

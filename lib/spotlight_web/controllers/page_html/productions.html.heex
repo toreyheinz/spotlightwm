@@ -136,7 +136,7 @@
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
         <img
           :for={photo <- all_photos}
-          src={photo.url}
+          src={"/images/w/400#{photo.url}"}
           alt={photo.caption || "Production photo"}
           class="rounded-lg shadow-md object-cover w-full h-48"
         />

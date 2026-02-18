@@ -16,12 +16,11 @@ defmodule SpotlightWeb.ImageController do
          true <- width in @allowed_widths,
          relative <- path_parts |> strip_uploads_prefix() |> Path.join(),
          false <- String.contains?(relative, "..") do
-      uploads_dir = Spotlight.Uploads.uploads_dir()
-      original = Path.join(uploads_dir, relative)
-      cache_dir = Path.join([uploads_dir, "_cache", "w#{width}"])
-      cached = Path.join(cache_dir, relative)
+      cache_base = Path.join(System.tmp_dir!(), "spotlight_image_cache")
+      cached = Path.join([cache_base, "w#{width}", relative])
       ext = Path.extname(relative) |> String.downcase()
       content_type = Map.get(@content_types, ext, "application/octet-stream")
+      url_path = "/uploads/#{relative}"
 
       cond do
         File.exists?(cached) ->
@@ -29,25 +28,30 @@ defmodule SpotlightWeb.ImageController do
           |> put_resp_content_type(content_type)
           |> send_file(200, cached)
 
-        File.exists?(original) ->
-          File.mkdir_p!(Path.dirname(cached))
-
-          {_, 0} =
-            System.cmd("convert", [
-              original,
-              "-resize",
-              "#{width}x",
-              "-quality",
-              "85",
-              cached
-            ])
-
-          conn
-          |> put_resp_content_type(content_type)
-          |> send_file(200, cached)
-
         true ->
-          send_resp(conn, 404, "Not found")
+          case Spotlight.Uploads.get(url_path) do
+            {:ok, tmp_path} ->
+              File.mkdir_p!(Path.dirname(cached))
+
+              {_, 0} =
+                System.cmd("convert", [
+                  tmp_path,
+                  "-resize",
+                  "#{width}x",
+                  "-quality",
+                  "85",
+                  cached
+                ])
+
+              File.rm(tmp_path)
+
+              conn
+              |> put_resp_content_type(content_type)
+              |> send_file(200, cached)
+
+            :error ->
+              send_resp(conn, 404, "Not found")
+          end
       end
     else
       _ -> send_resp(conn, 400, "Bad request")

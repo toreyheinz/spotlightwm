@@ -38,3 +38,6 @@ npm-debug.log
 # Uploads
 /uploads
 
+# Local environment files
+.env*
+

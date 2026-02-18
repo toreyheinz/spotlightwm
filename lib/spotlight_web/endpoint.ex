@@ -20,11 +20,6 @@ defmodule SpotlightWeb.Endpoint do
     gzip: not code_reloading?,
     only: SpotlightWeb.static_paths()
 
-  plug Plug.Static,
-    at: "/uploads",
-    from: Application.compile_env(:spotlight, :uploads_dir, "./uploads"),
-    gzip: false
-
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.
   if code_reloading? do
