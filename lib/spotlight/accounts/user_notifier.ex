@@ -9,7 +9,7 @@ defmodule Spotlight.Accounts.UserNotifier do
     email =
       new()
       |> to(recipient)
-      |> from({"Spotlight", "contact@example.com"})
+      |> from({"Spotlight Theater", "noreply@spotlightwm.org"})
       |> subject(subject)
       |> text_body(body)
 

@@ -55,4 +55,8 @@ if config_env() == :prod do
   if uploads_dir = System.get_env("UPLOADS_DIR") do
     config :spotlight, :uploads_dir, uploads_dir
   end
+
+  config :spotlight, Spotlight.Mailer,
+    adapter: Swoosh.Adapters.Postmark,
+    api_key: System.get_env("POSTMARK_API_KEY") || raise("missing POSTMARK_API_KEY")
 end
