@@ -22,7 +22,7 @@ defmodule SpotlightWeb.Endpoint do
 
   plug Plug.Static,
     at: "/uploads",
-    from: Application.compile_env(:spotlight, :uploads_dir, "uploads"),
+    from: Application.compile_env(:spotlight, :uploads_dir, "./uploads"),
     gzip: false
 
   # Code reloading can be explicitly enabled under the

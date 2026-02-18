@@ -52,5 +52,7 @@ if config_env() == :prod do
     http: [ip: {0, 0, 0, 0, 0, 0, 0, 0}, port: port],
     secret_key_base: secret_key_base
 
-  config :spotlight, :uploads_dir, System.get_env("UPLOADS_DIR") || "./uploads"
+  if uploads_dir = System.get_env("UPLOADS_DIR") do
+    config :spotlight, :uploads_dir, uploads_dir
+  end
 end
