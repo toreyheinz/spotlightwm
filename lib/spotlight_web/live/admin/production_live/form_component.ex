@@ -8,7 +8,7 @@ defmodule SpotlightWeb.Admin.ProductionLive.FormComponent do
     ~H"""
     <div>
       <.header>
-        <%= @title %>
+        {@title}
       </.header>
 
       <.form

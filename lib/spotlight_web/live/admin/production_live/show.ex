@@ -49,7 +49,7 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
           <.link navigate={~p"/admin/productions"} class="text-sm text-gray-600 hover:text-gray-900 mb-2 inline-block">
             ← Back to Productions
           </.link>
-          <h1 class="text-3xl font-bold text-gray-900"><%= @production.title %></h1>
+          <h1 class="text-3xl font-bold text-gray-900">{@production.title}</h1>
           <div class="mt-2">
             <span class={[
               "badge",
@@ -57,7 +57,7 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
               @production.status == :draft && "badge-warning",
               @production.status == :archived && "badge-ghost"
             ]}>
-              <%= @production.status %>
+              {@production.status}
             </span>
           </div>
         </div>
@@ -76,18 +76,18 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
                 <%= if @production.description do %>
                   <div>
                     <label class="text-sm font-medium text-gray-600">Description</label>
-                    <p class="whitespace-pre-wrap"><%= @production.description %></p>
+                    <p class="whitespace-pre-wrap">{@production.description}</p>
                   </div>
                 <% end %>
 
                 <div class="grid grid-cols-2 gap-4">
                   <div>
                     <label class="text-sm font-medium text-gray-600">Location</label>
-                    <p><%= @production.location_name || "Not set" %></p>
+                    <p>{@production.location_name || "Not set"}</p>
                   </div>
                   <div>
                     <label class="text-sm font-medium text-gray-600">Price</label>
-                    <p><%= @production.price || "Not set" %></p>
+                    <p>{@production.price || "Not set"}</p>
                   </div>
                 </div>
 
@@ -96,7 +96,7 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
                     <label class="text-sm font-medium text-gray-600">Ticket URL</label>
                     <p>
                       <a href={@production.ticket_url} target="_blank" class="link">
-                        <%= @production.ticket_url %>
+                        {@production.ticket_url}
                       </a>
                     </p>
                   </div>
@@ -131,9 +131,9 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
                       <%= for perf <- @production.performances do %>
                         <tr>
                           <td>
-                            <%= Calendar.strftime(perf.starts_at, "%a, %b %-d, %Y at %-I:%M %p") %>
+                            {Calendar.strftime(perf.starts_at, "%a, %b %-d, %Y at %-I:%M %p")}
                           </td>
-                          <td class="text-gray-600"><%= perf.notes %></td>
+                          <td class="text-gray-600">{perf.notes}</td>
                           <td>
                             <button
                               phx-click="delete_performance"
@@ -152,7 +152,7 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
               <% end %>
 
               <p class="text-sm text-gray-600 mt-2">
-                Date range: <%= Productions.format_date_range(@production) || "N/A" %>
+                Date range: {Productions.format_date_range(@production) || "N/A"}
               </p>
             </div>
           </div>

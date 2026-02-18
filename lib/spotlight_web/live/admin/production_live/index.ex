@@ -62,7 +62,7 @@ defmodule SpotlightWeb.Admin.ProductionLive.Index do
             <tr :for={{dom_id, production} <- @streams.productions} id={dom_id}>
               <td>
                 <.link navigate={~p"/admin/productions/#{production.id}"} class="link link-hover">
-                  <%= production.title %>
+                  {production.title}
                 </.link>
               </td>
               <td>
@@ -72,11 +72,11 @@ defmodule SpotlightWeb.Admin.ProductionLive.Index do
                   production.status == :draft && "badge-warning",
                   production.status == :archived && "badge-ghost"
                 ]}>
-                  <%= production.status %>
+                  {production.status}
                 </span>
               </td>
               <td class="text-sm text-gray-600">
-                <%= Productions.format_date_range(production) || "No performances" %>
+                {Productions.format_date_range(production) || "No performances"}
               </td>
               <td>
                 <div class="flex gap-2">

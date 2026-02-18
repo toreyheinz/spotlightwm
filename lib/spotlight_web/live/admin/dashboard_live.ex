@@ -52,9 +52,9 @@ defmodule SpotlightWeb.Admin.DashboardLive do
                 navigate={~p"/admin/productions/#{production.id}"}
                 class="block p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
               >
-                <h3 class="font-semibold text-gray-900"><%= production.title %></h3>
+                <h3 class="font-semibold text-gray-900">{production.title}</h3>
                 <p class="text-sm text-gray-600">
-                  <%= Productions.format_date_range(production) %>
+                  {Productions.format_date_range(production)}
                 </p>
               </.link>
             <% end %>

@@ -77,8 +77,8 @@ defmodule SpotlightWeb.Admin.UserLive.Index do
           </thead>
           <tbody id="users" phx-update="stream">
             <tr :for={{dom_id, user} <- @streams.users} id={dom_id}>
-              <td><%= user.name %></td>
-              <td><%= user.email %></td>
+              <td>{user.name}</td>
+              <td>{user.email}</td>
               <td>
                 <%= if user.confirmed_at do %>
                   <span class="badge badge-success">Active</span>
@@ -87,7 +87,7 @@ defmodule SpotlightWeb.Admin.UserLive.Index do
                 <% end %>
               </td>
               <td class="text-sm text-gray-600">
-                <%= Calendar.strftime(user.inserted_at, "%b %-d, %Y") %>
+                {Calendar.strftime(user.inserted_at, "%b %-d, %Y")}
               </td>
             </tr>
           </tbody>

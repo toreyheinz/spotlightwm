@@ -24,8 +24,10 @@ defmodule Spotlight.Repo.Migrations.CreateProductions do
 
     create table(:performances, primary_key: false) do
       add :id, :binary_id, primary_key: true
+
       add :production_id, references(:productions, type: :binary_id, on_delete: :delete_all),
         null: false
+
       add :starts_at, :utc_datetime, null: false
       add :ends_at, :utc_datetime
       add :notes, :string
@@ -38,8 +40,10 @@ defmodule Spotlight.Repo.Migrations.CreateProductions do
 
     create table(:production_photos, primary_key: false) do
       add :id, :binary_id, primary_key: true
+
       add :production_id, references(:productions, type: :binary_id, on_delete: :delete_all),
         null: false
+
       add :url, :string, null: false
       add :caption, :string
       add :position, :integer, null: false, default: 0
