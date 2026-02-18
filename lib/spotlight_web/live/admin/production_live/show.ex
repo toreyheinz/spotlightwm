@@ -324,7 +324,7 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
               <% else %>
                 <div class="grid grid-cols-2 gap-2">
                   <%= for photo <- @production.photos do %>
-                    <div class="relative group">
+                    <div class="relative group min-h-24 bg-gray-100 rounded-lg">
                       <img src={"/images/w/400#{photo.url}"} alt={photo.caption} class="rounded-lg w-full aspect-square object-cover" />
                       <button
                         phx-click="delete_photo"
