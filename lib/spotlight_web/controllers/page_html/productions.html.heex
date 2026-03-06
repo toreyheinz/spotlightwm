@@ -72,8 +72,8 @@
   <section class="py-12 bg-white">
     <div class="container mx-auto px-4">
       <h2 class="text-3xl font-bold text-[#1C3A47] mb-8 text-center">Past Productions</h2>
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-        <div :for={production <- @past} class="bg-[#F5EED6] rounded-lg overflow-hidden shadow-md">
+      <div class="flex flex-wrap justify-center gap-6 max-w-5xl mx-auto">
+        <div :for={production <- @past} class="bg-[#F5EED6] rounded-lg overflow-hidden shadow-md max-w-sm flex-none">
           <%= if production.main_image_url do %>
             <img
               src={"/images/w/400#{production.main_image_url}"}
