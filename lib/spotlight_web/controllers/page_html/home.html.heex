@@ -29,25 +29,25 @@
             class="w-full h-64 object-cover"
           />
         <% end %>
-        <div class="p-8 text-center">
-          <h2 class="text-3xl font-bold text-[#1C3A47] mb-2">
+        <div class="p-8">
+          <h2 class="text-3xl font-bold text-[#1C3A47] mb-2 text-center">
             &ldquo;{@next_production.title}&rdquo;
           </h2>
           <%= if date_range = Spotlight.Productions.format_date_range(@next_production) do %>
-            <p class="text-[#D4A574] font-semibold text-xl mb-4">{date_range}</p>
+            <p class="text-[#D4A574] font-semibold text-xl mb-4 text-center">{date_range}</p>
           <% end %>
           <%= if @next_production.description do %>
             <div class="text-gray-700 mb-6 rich-text">{raw(@next_production.description)}</div>
           <% end %>
           <% perf_tickets = Enum.filter(@next_production.performances, & &1.ticket_url) %>
           <%= if perf_tickets != [] do %>
-            <div class="flex flex-col gap-2 items-center">
+            <div class="flex flex-col gap-2">
               <%= for perf <- perf_tickets do %>
                 <a
                   href={perf.ticket_url}
                   target="_blank"
                   rel="noopener"
-                  class="inline-block bg-[#C23B23] hover:bg-[#C23B23]/80 text-white px-6 py-3 rounded-lg font-semibold transition w-full max-w-xs"
+                  class="inline-block bg-[#C23B23] hover:bg-[#C23B23]/80 text-white px-6 py-3 rounded-lg font-semibold transition w-full"
                 >
                   {Calendar.strftime(perf.starts_at, "%a %b %-d at %-I:%M %p")}
                 </a>
@@ -55,14 +55,16 @@
             </div>
           <% else %>
             <%= if @next_production.ticket_url do %>
-              <a
-                href={@next_production.ticket_url}
-                target="_blank"
-                rel="noopener"
-                class="inline-block bg-[#C23B23] hover:bg-[#C23B23]/80 text-white px-6 py-3 rounded-lg font-semibold transition"
-              >
-                Get Tickets
-              </a>
+              <div class="text-center">
+                <a
+                  href={@next_production.ticket_url}
+                  target="_blank"
+                  rel="noopener"
+                  class="inline-block bg-[#C23B23] hover:bg-[#C23B23]/80 text-white px-6 py-3 rounded-lg font-semibold transition"
+                >
+                  Get Tickets
+                </a>
+              </div>
             <% end %>
           <% end %>
         </div>

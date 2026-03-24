@@ -104,7 +104,7 @@
 
 /* This file is for your main application CSS */
 
-/* Rich text content styling (from TinyMCE) */
+/* Rich text content styling (from TinyMCE) — unlayered so it always beats Tailwind's layered reset */
 .rich-text p { margin-bottom: 0.75em; }
 .rich-text p:last-child { margin-bottom: 0; }
 .rich-text ul, .rich-text ol { margin-bottom: 0.75em; padding-left: 1.5em; }
