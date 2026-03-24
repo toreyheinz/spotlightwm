@@ -10,6 +10,7 @@ defmodule Spotlight.Productions.Performance do
     field :starts_at, :utc_datetime
     field :ends_at, :utc_datetime
     field :notes, :string
+    field :ticket_url, :string
 
     belongs_to :production, Production
 
@@ -19,10 +20,20 @@ defmodule Spotlight.Productions.Performance do
   @doc false
   def changeset(performance, attrs) do
     performance
-    |> cast(attrs, [:starts_at, :ends_at, :notes, :production_id])
+    |> cast(attrs, [:starts_at, :ends_at, :notes, :ticket_url, :production_id])
     |> validate_required([:starts_at, :production_id])
     |> validate_end_after_start()
+    |> validate_url(:ticket_url)
     |> foreign_key_constraint(:production_id)
+  end
+
+  defp validate_url(changeset, field) do
+    validate_change(changeset, field, fn _, url ->
+      case URI.parse(url) do
+        %URI{scheme: scheme, host: host} when scheme in ["http", "https"] and not is_nil(host) -> []
+        _ -> [{field, "must be a valid URL"}]
+      end
+    end)
   end
 
   defp validate_end_after_start(changeset) do

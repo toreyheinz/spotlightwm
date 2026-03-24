@@ -25,11 +25,41 @@ import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/spotlight"
 import topbar from "../vendor/topbar"
 
+const TinyMCE = {
+  mounted() {
+    const textarea = this.el.querySelector("textarea")
+    if (!textarea || !window.tinymce) return
+
+    tinymce.init({
+      target: textarea,
+      plugins: "lists link",
+      toolbar: "bold italic underline | bullist numlist | link | removeformat",
+      menubar: false,
+      statusbar: false,
+      height: 250,
+      skin_url: "https://cdn.jsdelivr.net/npm/tinymce@7/skins/ui/oxide",
+      content_css: "https://cdn.jsdelivr.net/npm/tinymce@7/skins/content/default/content.min.css",
+      setup: (editor) => {
+        editor.on("change keyup", () => {
+          textarea.value = editor.getContent()
+          textarea.dispatchEvent(new Event("input", {bubbles: true}))
+        })
+      }
+    })
+  },
+  destroyed() {
+    const textarea = this.el.querySelector("textarea")
+    if (textarea && textarea.id) {
+      tinymce.get(textarea.id)?.remove()
+    }
+  }
+}
+
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
-  hooks: {...colocatedHooks},
+  hooks: {...colocatedHooks, TinyMCE},
 })
 
 // Show progress bar on live navigation and form submits

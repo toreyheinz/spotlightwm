@@ -31,7 +31,7 @@
               <p class="text-[#D4A574] font-semibold text-xl mb-4">{date_range}</p>
             <% end %>
             <%= if production.description do %>
-              <p class="text-gray-700 mb-6">{production.description}</p>
+              <div class="text-gray-700 mb-6 rich-text mx-auto">{raw(production.description)}</div>
             <% end %>
             <div class="bg-[#F5EED6] p-4 rounded-lg mb-6">
               <%= if production.location_name do %>
@@ -50,15 +50,31 @@
                 </p>
               <% end %>
             </div>
-            <%= if production.ticket_url do %>
-              <a
-                href={production.ticket_url}
-                target="_blank"
-                rel="noopener"
-                class="inline-block bg-[#C23B23] hover:bg-[#C23B23]/80 text-white px-6 py-3 rounded-lg font-semibold transition"
-              >
-                Get Tickets
-              </a>
+            <% perf_tickets = Enum.filter(production.performances, & &1.ticket_url) %>
+            <%= if perf_tickets != [] do %>
+              <div class="flex flex-col gap-2 items-center">
+                <%= for perf <- perf_tickets do %>
+                  <a
+                    href={perf.ticket_url}
+                    target="_blank"
+                    rel="noopener"
+                    class="inline-block bg-[#C23B23] hover:bg-[#C23B23]/80 text-white px-6 py-3 rounded-lg font-semibold transition w-full max-w-xs"
+                  >
+                    {Calendar.strftime(perf.starts_at, "%a %b %-d at %-I:%M %p")}
+                  </a>
+                <% end %>
+              </div>
+            <% else %>
+              <%= if production.ticket_url do %>
+                <a
+                  href={production.ticket_url}
+                  target="_blank"
+                  rel="noopener"
+                  class="inline-block bg-[#C23B23] hover:bg-[#C23B23]/80 text-white px-6 py-3 rounded-lg font-semibold transition"
+                >
+                  Get Tickets
+                </a>
+              <% end %>
             <% end %>
           </div>
         </div>
@@ -89,7 +105,7 @@
               <p class="text-[#D4A574] font-semibold mb-3">{date_range}</p>
             <% end %>
             <%= if production.description do %>
-              <p class="text-gray-600 text-sm">{production.description}</p>
+              <div class="text-gray-600 text-sm rich-text">{raw(production.description)}</div>
             <% end %>
           </div>
         </div>

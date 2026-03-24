@@ -173,7 +173,7 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
                 <%= if @production.description do %>
                   <div>
                     <label class="text-sm font-medium text-gray-600">Description</label>
-                    <p class="whitespace-pre-wrap">{@production.description}</p>
+                    <div class="rich-text">{raw(@production.description)}</div>
                   </div>
                 <% end %>
 
@@ -221,6 +221,7 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
                       <tr class="text-gray-700">
                         <th>Date & Time</th>
                         <th>Notes</th>
+                        <th>Tickets</th>
                         <th></th>
                       </tr>
                     </thead>
@@ -231,6 +232,11 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
                             {Calendar.strftime(perf.starts_at, "%a, %b %-d, %Y at %-I:%M %p")}
                           </td>
                           <td class="text-gray-600">{perf.notes}</td>
+                          <td>
+                            <%= if perf.ticket_url do %>
+                              <a href={perf.ticket_url} target="_blank" class="link text-sm">Link</a>
+                            <% end %>
+                          </td>
                           <td class="flex gap-1">
                             <.link
                               patch={~p"/admin/productions/#{@production.id}/performances/#{perf.id}/edit"}

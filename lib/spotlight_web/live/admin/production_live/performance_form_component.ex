@@ -21,6 +21,7 @@ defmodule SpotlightWeb.Admin.ProductionLive.PerformanceFormComponent do
         <div class="space-y-4">
           <.input field={@form[:starts_at]} type="datetime-local" label="Date & Time" required />
           <.input field={@form[:notes]} type="text" label="Notes" placeholder="e.g. Matinee, Opening Night" />
+          <.input field={@form[:ticket_url]} type="url" label="Ticket URL" placeholder="https://www.eventbrite.com/..." />
         </div>
 
         <div class="mt-6 flex justify-end gap-3">

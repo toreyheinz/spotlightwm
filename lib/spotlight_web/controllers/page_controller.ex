@@ -2,7 +2,11 @@ defmodule SpotlightWeb.PageController do
   use SpotlightWeb, :controller
 
   def home(conn, _params) do
-    render(conn, :home)
+    next_production =
+      Spotlight.Productions.list_upcoming_productions()
+      |> List.first()
+
+    render(conn, :home, next_production: next_production)
   end
 
   def about(conn, _params) do
