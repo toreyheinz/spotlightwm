@@ -1,43 +1,37 @@
 <!-- Hero Section -->
-<section class="bg-gradient-to-b from-[#1C3A47] to-[#1C3A47]/90 text-[#F5EED6] py-16 md:py-24">
+<section class="bg-gradient-to-b from-[#1C3A47] to-[#1C3A47]/90 text-[#F5EED6] py-12 md:py-16">
   <div class="container mx-auto px-4 text-center">
     <img src="/images/logo.png" alt="Spotlight Theater Logo" class="h-32 md:h-40 mx-auto mb-6" />
     <h1 class="text-4xl md:text-5xl font-bold mb-4">Welcome to Spotlight Theater</h1>
     <p class="text-xl md:text-2xl mb-2">A FREE Theater for Everyone</p>
-    <p class="text-lg mb-8 opacity-90">Faith-Based, Family-Friendly Performances</p>
-    <a
-      href="/productions"
-      class="inline-block bg-[#C23B23] hover:bg-[#C23B23]/80 text-white px-8 py-3 rounded-lg font-semibold transition shadow-lg"
-    >
-      View Our Shows
-    </a>
+    <p class="text-lg opacity-90">Faith-Based, Family-Friendly Performances</p>
   </div>
 </section>
 
 <!-- Next Production -->
 <%= if @next_production do %>
-  <section class="py-12 bg-[#F5EED6]">
+  <section class="py-8 bg-[#F5EED6]">
     <div class="container mx-auto px-4">
-      <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
-        <div class="bg-[#C23B23] text-white p-3 text-center">
-          <span class="text-sm uppercase tracking-wide font-semibold">Coming Soon</span>
+      <div class="max-w-lg mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+        <div class="bg-[#C23B23] text-white p-2 text-center">
+          <span class="text-xs uppercase tracking-wide font-semibold">Coming Soon</span>
         </div>
         <%= if @next_production.main_image_url do %>
           <img
             src={"/images/w/800#{@next_production.main_image_url}"}
             alt={@next_production.title}
-            class="w-full h-64 object-cover"
+            class="w-full h-48 object-cover"
           />
         <% end %>
-        <div class="p-8">
-          <h2 class="text-3xl font-bold text-[#1C3A47] mb-2 text-center">
+        <div class="p-6">
+          <h2 class="text-2xl font-bold text-[#1C3A47] mb-1 text-center">
             &ldquo;{@next_production.title}&rdquo;
           </h2>
           <%= if date_range = Spotlight.Productions.format_date_range(@next_production) do %>
-            <p class="text-[#D4A574] font-semibold text-xl mb-4 text-center">{date_range}</p>
+            <p class="text-[#D4A574] font-semibold text-lg mb-3 text-center">{date_range}</p>
           <% end %>
           <%= if @next_production.description do %>
-            <div class="text-gray-700 mb-6 rich-text">{raw(@next_production.description)}</div>
+            <div class="text-gray-700 mb-4 text-sm rich-text">{raw(@next_production.description)}</div>
           <% end %>
           <% perf_tickets = Enum.filter(@next_production.performances, & &1.ticket_url) %>
           <%= if perf_tickets != [] do %>
@@ -47,7 +41,7 @@
                   href={perf.ticket_url}
                   target="_blank"
                   rel="noopener"
-                  class="inline-block bg-[#C23B23] hover:bg-[#C23B23]/80 text-white px-6 py-3 rounded-lg font-semibold transition w-full"
+                  class="inline-block bg-[#C23B23] hover:bg-[#C23B23]/80 text-white px-5 py-2.5 rounded-lg font-semibold transition w-full text-sm"
                 >
                   {Calendar.strftime(perf.starts_at, "%a %b %-d at %-I:%M %p")}
                 </a>
@@ -60,15 +54,47 @@
                   href={@next_production.ticket_url}
                   target="_blank"
                   rel="noopener"
-                  class="inline-block bg-[#C23B23] hover:bg-[#C23B23]/80 text-white px-6 py-3 rounded-lg font-semibold transition"
+                  class="inline-block bg-[#C23B23] hover:bg-[#C23B23]/80 text-white px-5 py-2.5 rounded-lg font-semibold transition text-sm"
                 >
                   Get Tickets
                 </a>
               </div>
             <% end %>
           <% end %>
+          <%= if @next_production.photos != [] do %>
+            <% photo_urls = Enum.map(@next_production.photos, fn p -> "/images/w/800#{p.url}" end) %>
+            <div class="grid grid-cols-4 gap-1.5 mt-4">
+              <%= for {photo, i} <- Enum.take(@next_production.photos, 4) |> Enum.with_index() do %>
+                <img
+                  src={"/images/w/200#{photo.url}"}
+                  alt={photo.caption || "Production photo"}
+                  class="rounded cursor-pointer object-cover w-full aspect-square hover:opacity-80 transition"
+                  onclick={"openLightbox(#{Jason.encode!(photo_urls)}, #{i})"}
+                />
+              <% end %>
+            </div>
+          <% end %>
         </div>
       </div>
+      <div class="text-center mt-6">
+        <a
+          href="/productions"
+          class="inline-block bg-[#1C3A47] hover:bg-[#1C3A47]/80 text-white px-8 py-3 rounded-lg font-semibold transition shadow-lg"
+        >
+          View Other Shows
+        </a>
+      </div>
+    </div>
+  </section>
+<% else %>
+  <section class="py-8 bg-[#F5EED6]">
+    <div class="container mx-auto px-4 text-center">
+      <a
+        href="/productions"
+        class="inline-block bg-[#C23B23] hover:bg-[#C23B23]/80 text-white px-8 py-3 rounded-lg font-semibold transition shadow-lg"
+      >
+        View Past Shows
+      </a>
     </div>
   </section>
 <% end %>

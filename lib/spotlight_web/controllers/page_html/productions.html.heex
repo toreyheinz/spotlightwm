@@ -81,6 +81,19 @@
                 </div>
               <% end %>
             <% end %>
+            <%= if production.photos != [] do %>
+              <% photo_urls = Enum.map(production.photos, fn p -> "/images/w/800#{p.url}" end) %>
+              <div class="grid grid-cols-4 gap-2 mt-6">
+                <%= for {photo, i} <- Enum.take(production.photos, 4) |> Enum.with_index() do %>
+                  <img
+                    src={"/images/w/200#{photo.url}"}
+                    alt={photo.caption || "Production photo"}
+                    class="rounded cursor-pointer object-cover w-full aspect-square hover:opacity-80 transition"
+                    onclick={"openLightbox(#{Jason.encode!(photo_urls)}, #{i})"}
+                  />
+                <% end %>
+              </div>
+            <% end %>
           </div>
         </div>
       </div>
@@ -111,6 +124,19 @@
             <% end %>
             <%= if production.description do %>
               <div class="text-gray-600 text-sm rich-text">{raw(production.description)}</div>
+            <% end %>
+            <%= if production.photos != [] do %>
+              <% photo_urls = Enum.map(production.photos, fn p -> "/images/w/800#{p.url}" end) %>
+              <div class="grid grid-cols-4 gap-1.5 mt-4">
+                <%= for {photo, i} <- Enum.take(production.photos, 4) |> Enum.with_index() do %>
+                  <img
+                    src={"/images/w/200#{photo.url}"}
+                    alt={photo.caption || "Production photo"}
+                    class="rounded cursor-pointer object-cover w-full aspect-square hover:opacity-80 transition"
+                    onclick={"openLightbox(#{Jason.encode!(photo_urls)}, #{i})"}
+                  />
+                <% end %>
+              </div>
             <% end %>
           </div>
         </div>

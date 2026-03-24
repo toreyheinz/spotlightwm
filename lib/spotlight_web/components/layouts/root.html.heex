@@ -153,11 +153,47 @@
       </div>
     </footer>
     
-<!-- Mobile menu toggle script -->
+<!-- Photo Lightbox -->
+    <div id="lightbox" class="fixed inset-0 z-50 bg-black/90 hidden items-center justify-center" onclick="if(event.target===this)closeLightbox()">
+      <button onclick="closeLightbox()" class="absolute top-4 right-4 text-white text-4xl leading-none hover:text-gray-300">&times;</button>
+      <button onclick="lightboxNav(-1)" class="absolute left-4 text-white text-4xl leading-none hover:text-gray-300">&#8249;</button>
+      <img id="lightbox-img" class="max-h-[85vh] max-w-[90vw] object-contain rounded-lg" />
+      <button onclick="lightboxNav(1)" class="absolute right-4 text-white text-4xl leading-none hover:text-gray-300">&#8250;</button>
+      <div id="lightbox-counter" class="absolute bottom-4 text-white text-sm"></div>
+    </div>
+
     <script>
       document.getElementById('mobile-menu-btn').addEventListener('click', function() {
         const menu = document.getElementById('nav-menu');
         menu.classList.toggle('hidden');
+      });
+
+      let lbPhotos = [], lbIndex = 0;
+      function openLightbox(photos, index) {
+        lbPhotos = photos; lbIndex = index;
+        showLightboxPhoto();
+        const lb = document.getElementById('lightbox');
+        lb.classList.remove('hidden');
+        lb.classList.add('flex');
+      }
+      function closeLightbox() {
+        const lb = document.getElementById('lightbox');
+        lb.classList.add('hidden');
+        lb.classList.remove('flex');
+      }
+      function lightboxNav(dir) {
+        lbIndex = (lbIndex + dir + lbPhotos.length) % lbPhotos.length;
+        showLightboxPhoto();
+      }
+      function showLightboxPhoto() {
+        document.getElementById('lightbox-img').src = lbPhotos[lbIndex];
+        document.getElementById('lightbox-counter').textContent = (lbIndex + 1) + ' / ' + lbPhotos.length;
+      }
+      document.addEventListener('keydown', function(e) {
+        if (document.getElementById('lightbox').classList.contains('hidden')) return;
+        if (e.key === 'Escape') closeLightbox();
+        if (e.key === 'ArrowLeft') lightboxNav(-1);
+        if (e.key === 'ArrowRight') lightboxNav(1);
       });
     </script>
   </body>
