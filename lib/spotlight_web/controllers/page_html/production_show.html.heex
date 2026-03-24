@@ -1,0 +1,136 @@
+<!-- Production Header -->
+<section class="bg-[#1C3A47] text-[#F5EED6] py-8">
+  <div class="container mx-auto px-4 text-center">
+    <h1 class="text-4xl md:text-5xl font-bold mb-2">
+      &ldquo;{@production.title}&rdquo;
+    </h1>
+    <%= if date_range = Spotlight.Productions.format_date_range(@production) do %>
+      <p class="text-[#D4A574] font-semibold text-xl">{date_range}</p>
+    <% end %>
+  </div>
+</section>
+
+<section class="py-12 bg-[#F5EED6]">
+  <div class="container mx-auto px-4">
+    <div class="max-w-3xl mx-auto">
+      <!-- Main Image -->
+      <%= if @production.main_image_url do %>
+        <img
+          src={"/images/w/1200#{@production.main_image_url}"}
+          alt={@production.title}
+          class="w-full rounded-lg shadow-lg mb-8 object-cover max-h-96"
+        />
+      <% end %>
+
+      <!-- Description -->
+      <%= if @production.description do %>
+        <div class="bg-white rounded-lg shadow p-8 mb-8 rich-text text-gray-700">
+          {raw(@production.description)}
+        </div>
+      <% end %>
+
+      <!-- Details & Tickets -->
+      <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <!-- Details -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-lg font-bold text-[#1C3A47] mb-4">Details</h2>
+          <dl class="space-y-3 text-sm text-gray-800">
+            <%= if @production.location_name do %>
+              <div>
+                <dt class="font-semibold text-gray-500 text-xs uppercase tracking-wide">Location</dt>
+                <dd>{@production.location_name}</dd>
+              </div>
+            <% end %>
+            <%= if @production.location_query do %>
+              <div>
+                <dt class="font-semibold text-gray-500 text-xs uppercase tracking-wide">Address</dt>
+                <dd>
+                  <a
+                    href={"https://www.google.com/maps/search/?api=1&query=#{URI.encode(@production.location_query)}"}
+                    target="_blank"
+                    rel="noopener"
+                    class="underline text-[#1C3A47] hover:text-[#C23B23]"
+                  >
+                    {@production.location_query}
+                  </a>
+                </dd>
+              </div>
+            <% end %>
+            <%= if @production.price do %>
+              <div>
+                <dt class="font-semibold text-gray-500 text-xs uppercase tracking-wide">Admission</dt>
+                <dd>{@production.price}</dd>
+              </div>
+            <% end %>
+          </dl>
+        </div>
+
+        <!-- Show Times & Tickets -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-lg font-bold text-[#1C3A47] mb-4">Show Times</h2>
+          <%= if @production.performances != [] do %>
+            <div class="space-y-3">
+              <%= for perf <- @production.performances do %>
+                <div class="flex items-center justify-between gap-4">
+                  <div class="text-sm text-gray-800">
+                    <p class="font-semibold">{Calendar.strftime(perf.starts_at, "%A, %b %-d")}</p>
+                    <p>{Calendar.strftime(perf.starts_at, "%-I:%M %p")}</p>
+                    <%= if perf.notes do %>
+                      <p class="text-gray-600 text-xs">{perf.notes}</p>
+                    <% end %>
+                  </div>
+                  <%= if perf.ticket_url do %>
+                    <a
+                      href={perf.ticket_url}
+                      target="_blank"
+                      rel="noopener"
+                      class="btn btn-sm bg-[#C23B23] hover:bg-[#C23B23]/80 text-white border-none"
+                    >
+                      Tickets
+                    </a>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <%= if @production.ticket_url do %>
+              <a
+                href={@production.ticket_url}
+                target="_blank"
+                rel="noopener"
+                class="inline-block bg-[#C23B23] hover:bg-[#C23B23]/80 text-white px-6 py-3 rounded-lg font-semibold transition w-full text-center"
+              >
+                Get Tickets
+              </a>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Photo Gallery -->
+      <%= if @production.photos != [] do %>
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-lg font-bold text-[#1C3A47] mb-4">Photos</h2>
+          <% photo_urls = Enum.map(@production.photos, fn p -> "/images/w/800#{p.url}" end) %>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <%= for {photo, i} <- Enum.with_index(@production.photos) do %>
+              <img
+                src={"/images/w/400#{photo.url}"}
+                alt={photo.caption || "Production photo"}
+                class="rounded-lg cursor-pointer object-cover w-full aspect-square hover:opacity-80 transition"
+                onclick={"openLightbox(#{Jason.encode!(photo_urls)}, #{i})"}
+              />
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Back link -->
+      <div class="text-center mt-8">
+        <a href="/productions" class="text-[#1C3A47] hover:text-[#C23B23] transition font-semibold">
+          &larr; All Productions
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

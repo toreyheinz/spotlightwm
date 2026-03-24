@@ -4,10 +4,25 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content={get_csrf_token()} />
-    <meta
-      name="description"
-      content="Spotlight Homeschool Community Theater - Free, faith-based, family-friendly theater productions in West Michigan."
-    />
+    <%= if og = assigns[:og] do %>
+      <meta name="description" content={og.description} />
+      <meta property="og:title" content={og.title} />
+      <meta property="og:description" content={og.description} />
+      <meta property="og:url" content={og.url} />
+      <meta property="og:type" content="website" />
+      <meta property="og:site_name" content="Spotlight Theater" />
+      <%= if og.image do %>
+        <meta property="og:image" content={og.image} />
+        <meta name="twitter:card" content="summary_large_image" />
+      <% end %>
+      <meta name="twitter:title" content={og.title} />
+      <meta name="twitter:description" content={og.description} />
+    <% else %>
+      <meta
+        name="description"
+        content="Spotlight Homeschool Community Theater - Free, faith-based, family-friendly theater productions in West Michigan."
+      />
+    <% end %>
     <.live_title default="Spotlight Theater" suffix=" · West Michigan">
       {assigns[:page_title]}
     </.live_title>

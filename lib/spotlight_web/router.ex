@@ -23,6 +23,7 @@ defmodule SpotlightWeb.Router do
     get "/", PageController, :home
     get "/about", PageController, :about
     get "/productions", PageController, :productions
+    get "/productions/:slug", PageController, :production_show
     get "/golden-quill", PageController, :golden_quill
     get "/contact", PageController, :contact
   end

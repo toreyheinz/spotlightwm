@@ -25,7 +25,9 @@
           <% end %>
           <div class="p-8">
             <h3 class="text-3xl font-bold text-[#1C3A47] mb-2 text-center">
-              &ldquo;{production.title}&rdquo;
+              <a href={"/productions/#{Spotlight.Productions.production_path(production)}"} class="hover:text-[#C23B23] transition">
+                &ldquo;{production.title}&rdquo;
+              </a>
             </h3>
             <%= if date_range = Spotlight.Productions.format_date_range(production) do %>
               <p class="text-[#D4A574] font-semibold text-xl mb-4 text-center">{date_range}</p>

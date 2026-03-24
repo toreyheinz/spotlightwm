@@ -8,6 +8,7 @@ defmodule Spotlight.Productions.Production do
   @foreign_key_type :binary_id
   schema "productions" do
     field :title, :string
+    field :slug, :string
     field :description, :string
     field :location_name, :string
     field :location_query, :string
@@ -37,7 +38,26 @@ defmodule Spotlight.Productions.Production do
     ])
     |> validate_required([:title])
     |> validate_length(:title, min: 1, max: 255)
+    |> maybe_generate_slug()
+    |> unique_constraint(:slug)
     |> validate_url(:ticket_url)
+  end
+
+  defp maybe_generate_slug(changeset) do
+    case {get_field(changeset, :slug), get_change(changeset, :title)} do
+      {nil, title} when is_binary(title) -> put_change(changeset, :slug, slugify(title))
+      {_, title} when is_binary(title) -> put_change(changeset, :slug, slugify(title))
+      _ -> changeset
+    end
+  end
+
+  defp slugify(title) do
+    title
+    |> String.downcase()
+    |> String.replace(~r/[^\w\s-]/u, "")
+    |> String.replace(~r/[\s_]+/, "-")
+    |> String.replace(~r/-+/, "-")
+    |> String.trim("-")
   end
 
   defp validate_url(changeset, field) do

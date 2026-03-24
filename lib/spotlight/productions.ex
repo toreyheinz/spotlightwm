@@ -81,6 +81,44 @@ defmodule Spotlight.Productions do
   def get_production!(id), do: Repo.get!(Production, id)
 
   @doc """
+  Gets a published production by the short ID suffix from a URL path.
+  Extracts the 8-char ID prefix after "--" in the path.
+  """
+  def get_published_production_by_path!(path) do
+    short_id =
+      path
+      |> String.split("--")
+      |> List.last()
+
+    from(p in Production,
+      where: p.status == :published and fragment("CAST(? AS text) LIKE ?", p.id, ^"#{short_id}%"),
+      preload: [:performances, :photos]
+    )
+    |> Repo.one!()
+  end
+
+  @doc """
+  Builds a URL-friendly path segment for a production.
+  Format: YYYY-MM-title-slug--short-id (e.g., "2026-04-a-whimsical-night--b7e508ce")
+  """
+  def production_path(%Production{} = production) do
+    short_id = production.id |> String.split("-") |> List.first()
+
+    date_prefix =
+      case opening_night(production) do
+        %{starts_at: starts_at} -> Calendar.strftime(starts_at, "%Y-%m")
+        nil -> nil
+      end
+
+    slug = production.slug || "show"
+
+    case date_prefix do
+      nil -> "#{slug}--#{short_id}"
+      prefix -> "#{prefix}-#{slug}--#{short_id}"
+    end
+  end
+
+  @doc """
   Gets a production with all associations preloaded.
   """
   def get_production_with_details!(id) do
