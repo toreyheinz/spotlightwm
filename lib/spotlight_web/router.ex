@@ -76,7 +76,6 @@ defmodule SpotlightWeb.Router do
       live "/productions", ProductionLive.Index, :index
       live "/productions/new", ProductionLive.Index, :new
       live "/productions/:id", ProductionLive.Show, :show
-      live "/productions/:id/edit", ProductionLive.Show, :edit
       live "/productions/:id/performances/new", ProductionLive.Show, :add_performance
       live "/productions/:id/performances/:performance_id/edit", ProductionLive.Show, :edit_performance
       live "/users", UserLive.Index, :index

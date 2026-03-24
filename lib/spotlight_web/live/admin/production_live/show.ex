@@ -32,21 +32,42 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
      socket
      |> assign(:page_title, page_title(socket.assigns.live_action, production))
      |> assign(:production, production)
-     |> assign(:performance, performance)}
+     |> assign(:performance, performance)
+     |> assign_form(production)}
+  end
+
+  defp assign_form(socket, production) do
+    assign(socket, :form, to_form(Productions.change_production(production)))
   end
 
   @impl true
-  def handle_info({SpotlightWeb.Admin.ProductionLive.FormComponent, {:saved, production}}, socket) do
-    production = Productions.get_production_with_details!(production.id)
-    {:noreply, assign(socket, :production, production)}
-  end
-
   def handle_info({SpotlightWeb.Admin.ProductionLive.PerformanceFormComponent, {:performance_saved, _performance}}, socket) do
     production = Productions.get_production_with_details!(socket.assigns.production.id)
     {:noreply, assign(socket, :production, production)}
   end
 
   @impl true
+  def handle_event("validate_production", %{"production" => params}, socket) do
+    changeset = Productions.change_production(socket.assigns.production, params)
+    {:noreply, assign(socket, form: to_form(changeset, action: :validate))}
+  end
+
+  def handle_event("save_production", %{"production" => params}, socket) do
+    case Productions.update_production(socket.assigns.production, params) do
+      {:ok, production} ->
+        production = Productions.get_production_with_details!(production.id)
+
+        {:noreply,
+         socket
+         |> put_flash(:info, "Production updated")
+         |> assign(:production, production)
+         |> assign_form(production)}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, form: to_form(changeset))}
+    end
+  end
+
   def handle_event("delete_performance", %{"id" => id}, socket) do
     performance = Enum.find(socket.assigns.production.performances, &(&1.id == id))
 
@@ -133,7 +154,6 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
   end
 
   defp page_title(:show, production), do: production.title
-  defp page_title(:edit, production), do: "Edit #{production.title}"
   defp page_title(:add_performance, production), do: "#{production.title} — Add Performance"
   defp page_title(:edit_performance, production), do: "#{production.title} — Edit Performance"
 
@@ -141,64 +161,55 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
   def render(assigns) do
     ~H"""
     <div class="container mx-auto px-4 py-8 text-gray-800">
-      <div class="flex justify-between items-start mb-8">
-        <div>
-          <.link navigate={~p"/admin/productions"} class="text-sm text-gray-600 hover:text-gray-900 mb-2 inline-block">
-            ← Back to Productions
-          </.link>
-          <h1 class="text-3xl font-bold text-gray-900">{@production.title}</h1>
-          <div class="mt-2">
-            <span class={[
-              "badge",
-              @production.status == :published && "badge-success",
-              @production.status == :draft && "badge-warning",
-              @production.status == :archived && "badge-ghost"
-            ]}>
-              {@production.status}
-            </span>
-          </div>
-        </div>
-        <.link patch={~p"/admin/productions/#{@production.id}/edit"} class="btn btn-primary">
-          Edit Production
+      <div class="mb-8">
+        <.link navigate={~p"/admin/productions"} class="text-sm text-gray-600 hover:text-gray-900 mb-2 inline-block">
+          ← Back to Productions
         </.link>
+        <h1 class="text-3xl font-bold text-gray-900">{@production.title}</h1>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div class="lg:col-span-2 space-y-8">
-          <%!-- Details --%>
+          <%!-- Details Form --%>
           <div class="card bg-white shadow">
             <div class="card-body">
               <h2 class="card-title">Details</h2>
-              <div class="space-y-4">
-                <%= if @production.description do %>
-                  <div>
-                    <label class="text-sm font-medium text-gray-600">Description</label>
-                    <div class="rich-text">{raw(@production.description)}</div>
-                  </div>
-                <% end %>
+              <.form for={@form} phx-change="validate_production" phx-submit="save_production">
+                <div class="space-y-4">
+                  <.input field={@form[:title]} type="text" label="Title" required />
 
-                <div class="grid grid-cols-2 gap-4">
-                  <div>
-                    <label class="text-sm font-medium text-gray-600">Location</label>
-                    <p>{@production.location_name || "Not set"}</p>
+                  <div id="tinymce-wrapper" phx-hook="TinyMCE" phx-update="ignore">
+                    <.input field={@form[:description]} type="textarea" label="Description" rows="6" />
                   </div>
-                  <div>
-                    <label class="text-sm font-medium text-gray-600">Price</label>
-                    <p>{@production.price || "Not set"}</p>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <.input field={@form[:location_name]} type="text" label="Location Name" placeholder="Spotlight Theater" />
+                    <.input field={@form[:location_query]} type="text" label="Location (for map)" placeholder="Spotlight Theater, Grand Rapids MI" />
                   </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <.input field={@form[:price]} type="text" label="Price" placeholder="$15 adults / $10 students" />
+                    <.input field={@form[:ticket_url]} type="url" label="Ticket URL" placeholder="https://..." />
+                  </div>
+
+                  <.input
+                    field={@form[:status]}
+                    type="select"
+                    label="Status"
+                    options={[
+                      {"Draft", "draft"},
+                      {"Published", "published"},
+                      {"Archived", "archived"}
+                    ]}
+                  />
                 </div>
 
-                <%= if @production.ticket_url do %>
-                  <div>
-                    <label class="text-sm font-medium text-gray-600">Ticket URL</label>
-                    <p>
-                      <a href={@production.ticket_url} target="_blank" class="link">
-                        {@production.ticket_url}
-                      </a>
-                    </p>
-                  </div>
-                <% end %>
-              </div>
+                <div class="mt-6 flex justify-end">
+                  <.button phx-disable-with="Saving..." class="btn btn-primary">
+                    Save Production
+                  </.button>
+                </div>
+              </.form>
             </div>
           </div>
 
@@ -385,22 +396,6 @@ defmodule SpotlightWeb.Admin.ProductionLive.Show do
           </div>
         </div>
       </div>
-
-      <.modal
-        :if={@live_action == :edit}
-        id="production-modal"
-        show
-        on_cancel={JS.patch(~p"/admin/productions/#{@production.id}")}
-      >
-        <.live_component
-          module={SpotlightWeb.Admin.ProductionLive.FormComponent}
-          id={@production.id}
-          title="Edit Production"
-          action={@live_action}
-          production={@production}
-          patch={~p"/admin/productions/#{@production.id}"}
-        />
-      </.modal>
 
       <.modal
         :if={@live_action in [:add_performance, :edit_performance]}

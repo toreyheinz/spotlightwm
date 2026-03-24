@@ -20,9 +20,7 @@ defmodule SpotlightWeb.Admin.ProductionLive.FormComponent do
       >
         <div class="space-y-4">
           <.input field={@form[:title]} type="text" label="Title" required />
-          <div id="tinymce-wrapper" phx-hook="TinyMCE" phx-update="ignore">
-            <.input field={@form[:description]} type="textarea" label="Description" rows="4" />
-          </div>
+          <.input field={@form[:description]} type="textarea" label="Description" rows="4" />
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <.input field={@form[:location_name]} type="text" label="Location Name" placeholder="Spotlight Theater" />

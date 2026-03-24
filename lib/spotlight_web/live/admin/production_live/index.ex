@@ -80,7 +80,7 @@ defmodule SpotlightWeb.Admin.ProductionLive.Index do
               </td>
               <td>
                 <div class="flex gap-2">
-                  <.link navigate={~p"/admin/productions/#{production.id}/edit"} class="btn btn-sm btn-ghost">
+                  <.link navigate={~p"/admin/productions/#{production.id}"} class="btn btn-sm btn-ghost">
                     Edit
                   </.link>
                   <button
