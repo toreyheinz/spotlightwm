@@ -1,0 +1,38 @@
+# Build artifacts and deps — built fresh in the image
+_build
+deps
+node_modules
+assets/node_modules
+
+# Test/dev artifacts
+cover
+doc
+.fetch
+*.ez
+erl_crash.dump
+priv/static/assets
+
+# Editor / OS
+.git
+.gitignore
+.elixir_ls
+.formatter.exs
+.tool-versions
+.DS_Store
+*.swp
+*.swo
+
+# Local env / secrets — must be injected via container env, never baked
+.env
+.env.*
+config/*.secret.exs
+
+# Documentation that doesn't belong in the image
+AGENTS.md
+CLAUDE.md
+README*.md
+dev/
+
+# Old deploy machinery (systemd-era) — ignored to avoid stale references
+deploy/
+build.sh
